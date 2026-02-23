@@ -4,7 +4,8 @@ import 'package:swacch_setu/Model/water_quality_model.dart';
 
 class ApiService {
   static const String baseUrl =
-      'https://2950-2409-40c2-10-be96-d7b-623f-516d-5e55.ngrok-free.app';
+      // 'https://a5e0-2409-40c2-10-be96-d7b-623f-516d-5e55.ngrok-free.app';
+      'http://172.16.217.102:8000';
 
   // Check water quality and store in database
   Future<WaterQualityResponse> checkWaterQuality(
@@ -16,6 +17,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
         body: json.encode(request.toJson()),
       );
@@ -48,6 +50,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
         },
       );
 
@@ -65,27 +68,38 @@ class ApiService {
   // Get latest reading
   Future<HistoryRecord?> getLatestReading() async {
     try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/api/water-quality/latest'),
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-      );
+      final response = await http
+          .get(
+            Uri.parse('$baseUrl/api/water-quality/latest'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'ngrok-skip-browser-warning': 'true',
+            },
+          )
+          .timeout(const Duration(seconds: 5));
+
+      print('Latest reading response: ${response.statusCode}');
+      print('Latest reading body: ${response.body}');
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        // Check if response contains message (no records)
+        // if (data.containsKey('message') || data.containsKey('status')) {
+        //   print('No records found in database');
+        //   return null;
+        // }
         if (data.containsKey('message')) {
           return null;
         }
         return HistoryRecord.fromJson(data);
       } else {
-        throw Exception(
-          'Failed to load latest reading: ${response.statusCode}',
-        );
+        print('Failed to load latest reading: ${response.statusCode}');
+        return null; // Return null instead of throwing
       }
     } catch (e) {
-      throw Exception('Network error: $e');
+      print('Latest reading error: $e');
+      return null; // Return null on error
     }
   }
 }

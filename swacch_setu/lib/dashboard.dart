@@ -504,6 +504,29 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchLatestReading();
   }
 
+  // Future<void> _fetchLatestReading() async {
+  //   setState(() => _isLoading = true);
+
+  //   try {
+  //     final latest = await _apiService.getLatestReading();
+  //     if (latest != null) {
+  //       setState(() {
+  //         _phLevel = latest.phLevel;
+  //         _tds = latest.tdsLevel;
+  //         _turbidity = latest.turbidityLevel;
+  //         _temperature = latest.temperature;
+  //         _waterStatus = latest.status;
+  //         _lastUpdated = latest.timestamp;
+  //       });
+  //     }
+  //   } catch (e) {
+  //     print('Error fetching latest reading: $e');
+  //     // Keep using mock data if API fails
+  //   } finally {
+  //     setState(() => _isLoading = false);
+  //   }
+  // }
+
   Future<void> _fetchLatestReading() async {
     setState(() => _isLoading = true);
 
@@ -518,10 +541,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _waterStatus = latest.status;
           _lastUpdated = latest.timestamp;
         });
+        print('Loaded latest reading from database');
       }
     } catch (e) {
-      print('Error fetching latest reading: $e');
-      // Keep using mock data if API fails
+      print('Error in _fetchLatestReading: $e');
+      // Keep using default values
     } finally {
       setState(() => _isLoading = false);
     }
@@ -580,46 +604,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       }
     } catch (e) {
       print('Error in check water quality: $e');
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      ScaffoldMessenger.of(context);
     } finally {
       setState(() => _isLoading = false);
     }
   }
-
-  // Future<void> _checkWaterQuality() async {
-  //   setState(() => _isLoading = true);
-
-  //   try {
-  //     final request = WaterQualityRequest(
-  //       ph: _phLevel,
-  //       tds: _tds,
-  //       turbidity: _turbidity,
-  //       temperature: _temperature,
-  //       source: _selectedSource,
-  //     );
-
-  //     final response = await _apiService.checkWaterQuality(request);
-
-  //     setState(() {
-  //       _waterStatus = response.status;
-  //       _alerts = response.alerts;
-  //       _lastUpdated = response.timestamp;
-  //     });
-
-  //     // Show alerts if any
-  //     if (_alerts.isNotEmpty) {
-  //       _showAlertsDialog();
-  //     }
-  //   } catch (e) {
-  //     ScaffoldMessenger.of(
-  //       context,
-  //     ).showSnackBar(SnackBar(content: Text('Error: $e')));
-  //   } finally {
-  //     setState(() => _isLoading = false);
-  //   }
-  // }
 
   void _showAlertsDialog() {
     showDialog(

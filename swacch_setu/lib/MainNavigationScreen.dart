@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:swacch_setu/Alert_screen.dart';
 import 'package:swacch_setu/History_screen.dart';
 import 'package:swacch_setu/dashboard.dart';
@@ -12,7 +13,35 @@ class MainNavigationScreen extends StatefulWidget {
 
 class _MainNavigationScreenState extends State<MainNavigationScreen> {
   int _selectedIndex = 0;
-  bool _isConnected = true;
+
+  bool _isConnected = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkConnection(); // ← Call on startup
+  }
+
+  Future<void> _checkConnection() async {
+    try {
+      final response = await http
+          .get(
+            Uri.parse(
+              'https://58e4-2409-40c2-10-be96-d7b-623f-516d-5e55.ngrok-free.app/',
+            ),
+            headers: {'ngrok-skip-browser-warning': 'true'},
+          )
+          .timeout(const Duration(seconds: 5)); // Timeout after 5 seconds
+
+      setState(() {
+        _isConnected = response.statusCode == 200;
+      });
+    } catch (e) {
+      setState(() {
+        _isConnected = false;
+      });
+    }
+  }
 
   final List<Widget> _screens = [
     const DashboardScreen(),
@@ -97,6 +126,7 @@ class _MainNavigationScreenState extends State<MainNavigationScreen> {
         onPressed: () {
           // Refresh data
           setState(() {});
+          _checkConnection();
         },
         backgroundColor: const Color(0xFF00A8E8),
         child: const Icon(Icons.refresh_rounded),
